@@ -355,16 +355,21 @@ drawbar(void) {
 	}
 
 	addch(' ');
-
 	attrset(BAR_LAYOUT);
 	addstr(layout->symbol);
 	attrset(TAG_NORMAL);
-
 	addch(' ');
 
+	if (runinall) {
+		attrset(BAR_RUNALL);
+		addstr(" R ");
+		attrset(TAG_NORMAL);
+		addch(' ');
+	}
+
 	if (interpret_keybinding) {
-		attrset(BAR_KEY);
-		addstr(" key ");
+		attrset(BAR_KEYBIND);
+		addstr(" K ");
 		attrset(TAG_NORMAL);
 	}
 	if (key_index > 0) {

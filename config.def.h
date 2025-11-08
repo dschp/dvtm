@@ -13,27 +13,29 @@
 
 enum {
 	DEFAULT,
-	BLUE,
-	GREEN,
-	YELLOW,
+	SELECTED,
+	LAYOUT,
+	KEYBIND,
+	RUNALL,
 };
 
 static Color colors[] = {
-	[DEFAULT] = { .fg = -1,           .bg = -1, .fg256 = -1,  .bg256 = -1, },
-	[BLUE]    = { .fg = COLOR_BLUE,   .bg = -1, .fg256 = 68,  .bg256 = -1, },
-	[GREEN]   = { .bg = COLOR_GREEN,  .fg = -1, .bg256 = 34,  .fg256 = -1, },
-	[YELLOW]  = { .fg = COLOR_YELLOW, .bg = -1, .fg256 = 220, .bg256 = -1, },
+	[DEFAULT]  = { .fg = -1,           .bg = -1, .fg256 = -1,  .bg256 = -1, },
+	[SELECTED] = { .fg = COLOR_BLUE,   .bg = -1, .fg256 = 68,  .bg256 = -1, },
+	[LAYOUT]   = { .fg = COLOR_YELLOW, .bg = -1, .fg256 = 220, .bg256 = -1, },
+	[KEYBIND]  = { .bg = COLOR_GREEN,  .fg = -1, .bg256 = 34,  .fg256 = -1, },
+	[RUNALL]   = { .bg = COLOR_RED,    .fg = -1, .bg256 = 160, .fg256 = -1, },
 };
 
 #define COLOR(c)        COLOR_PAIR(colors[c].pair)
 /* curses attributes for the currently focused window */
-#define SELECTED_ATTR   (COLOR(BLUE) | A_NORMAL)
+#define SELECTED_ATTR   (COLOR(SELECTED) | A_NORMAL)
 /* curses attributes for normal (not selected) windows */
 #define NORMAL_ATTR     (COLOR(DEFAULT) | A_NORMAL)
 /* curses attributes for a window with pending urgent flag */
 #define URGENT_ATTR     NORMAL_ATTR
 /* curses attributes for the status bar */
-#define BAR_ATTR        (COLOR(BLUE) | A_NORMAL)
+#define BAR_ATTR        (COLOR(SELECTED) | A_NORMAL)
 /* characters for beginning and end of status bar message */
 #define BAR_BEGIN       '['
 #define BAR_END         ']'
@@ -50,16 +52,17 @@ static Color colors[] = {
 /* printf format string for the tag in the status bar */
 #define TAG_SYMBOL   "[%s]"
 /* curses attributes for the currently selected tags */
-#define TAG_SEL      (COLOR(BLUE) | A_BOLD)
+#define TAG_SEL      (COLOR(SELECTED) | A_BOLD)
 /* curses attributes for not selected tags which contain no windows */
 #define TAG_NORMAL   (COLOR(DEFAULT) | A_NORMAL)
 /* curses attributes for not selected tags which contain windows */
-#define TAG_OCCUPIED (COLOR(BLUE) | A_NORMAL)
+#define TAG_OCCUPIED (COLOR(SELECTED) | A_NORMAL)
 /* curses attributes for not selected tags which with urgent windows */
-#define TAG_URGENT   (COLOR(BLUE) | A_NORMAL | A_BLINK)
+#define TAG_URGENT   (COLOR(SELECTED) | A_NORMAL | A_BLINK)
 
-#define BAR_KEY      (COLOR(GREEN) | A_NORMAL)
-#define BAR_LAYOUT   (COLOR(YELLOW) | A_NORMAL)
+#define BAR_LAYOUT   (COLOR(LAYOUT) | A_NORMAL)
+#define BAR_RUNALL   (COLOR(RUNALL) | A_NORMAL)
+#define BAR_KEYBIND  (COLOR(KEYBIND) | A_NORMAL)
 
 const char tags[][8] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
@@ -125,13 +128,12 @@ static KeyBinding bindings[] = {
 	{ { MOD, '9',          }, { focusn,         { "9" }                     } },
 	{ { MOD, '\t',         }, { focuslast,      { NULL }                    } },
 	{ { MOD, 'q', 'q',     }, { quit,           { NULL }                    } },
-	{ { MOD, 'a',          }, { togglerunall,   { NULL }                    } },
-	{ { MOD, CTRL('L'),    }, { redraw,         { NULL }                    } },
-	{ { MOD, 'r',          }, { redraw,         { NULL }                    } },
 	{ { MOD, 'E',          }, { copymode,       { "dvtm-editor" }           } },
 	{ { MOD, 'e',          }, { copymode,       { "dvtm-pager" }            } },
 	{ { MOD, '/',          }, { copymode,       { "dvtm-pager", "/" }       } },
+	{ { MOD, 'r',          }, { togglerunall,   { NULL }                    } },
 	{ { MOD, 'p',          }, { paste,          { NULL }                    } },
+	{ { MOD, 'd',          }, { redraw,         { NULL }                    } },
 	{ { MOD, KEY_PPAGE,    }, { scrollback,     { "-1" }                    } },
 	{ { MOD, KEY_NPAGE,    }, { scrollback,     { "1"  }                    } },
 	{ { MOD, '?',          }, { create,         { "man dvtm", "dvtm help" } } },
