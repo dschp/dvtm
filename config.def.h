@@ -15,16 +15,20 @@ enum {
 	DEFAULT,
 	SELECTED,
 	LAYOUT,
+	C_MFACT,
+	C_NMASTER,
 	KEYBIND,
 	RUNALL,
 };
 
 static Color colors[] = {
-	[DEFAULT]  = { .fg = -1,           .bg = -1, .fg256 = -1,  .bg256 = -1, },
-	[SELECTED] = { .fg = COLOR_BLUE,   .bg = -1, .fg256 = 68,  .bg256 = -1, },
-	[LAYOUT]   = { .fg = COLOR_YELLOW, .bg = -1, .fg256 = 220, .bg256 = -1, },
-	[KEYBIND]  = { .bg = COLOR_GREEN,  .fg = -1, .bg256 = 34,  .fg256 = -1, },
-	[RUNALL]   = { .bg = COLOR_RED,    .fg = -1, .bg256 = 160, .fg256 = -1, },
+	[DEFAULT]   = { .fg = -1,            .bg = -1, .fg256 = -1,  .bg256 = -1, },
+	[SELECTED]  = { .fg = COLOR_BLUE,    .bg = -1, .fg256 = 68,  .bg256 = -1, },
+	[LAYOUT]    = { .fg = COLOR_YELLOW,  .bg = -1, .fg256 = 220, .bg256 = -1, },
+	[C_MFACT]   = { .fg = COLOR_MAGENTA, .bg = -1, .fg256 = 129, .bg256 = -1, },
+	[C_NMASTER] = { .fg = COLOR_CYAN,    .bg = -1, .fg256 = 39,  .bg256 = -1, },
+	[KEYBIND]   = { .bg = COLOR_GREEN,   .fg = -1, .bg256 = 34,  .fg256 = -1, },
+	[RUNALL]    = { .bg = COLOR_RED,     .fg = -1, .bg256 = 160, .fg256 = -1, },
 };
 
 #define COLOR(c)        COLOR_PAIR(colors[c].pair)
@@ -61,6 +65,8 @@ static Color colors[] = {
 #define TAG_URGENT   (COLOR(SELECTED) | A_NORMAL | A_BLINK)
 
 #define BAR_LAYOUT   (COLOR(LAYOUT) | A_NORMAL)
+#define BAR_MFACT    (COLOR(C_MFACT) | A_NORMAL)
+#define BAR_NMASTER  (COLOR(C_NMASTER) | A_NORMAL)
 #define BAR_RUNALL   (COLOR(RUNALL) | A_NORMAL)
 #define BAR_KEYBIND  (COLOR(KEYBIND) | A_NORMAL)
 

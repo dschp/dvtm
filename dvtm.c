@@ -354,11 +354,14 @@ drawbar(void) {
 		printw(TAG_SYMBOL, tags[i]);
 	}
 
-	addch(' ');
 	attrset(BAR_LAYOUT);
-	addstr(layout->symbol);
-	attrset(TAG_NORMAL);
-	addch(' ');
+	printw(" %s", layout->symbol);
+
+	attrset(BAR_MFACT);
+	printw(" %.2f", screen.mfact);
+
+	attrset(BAR_NMASTER);
+	printw(" %d ", screen.nmaster);
 
 	if (runinall) {
 		attrset(BAR_RUNALL);
@@ -371,18 +374,17 @@ drawbar(void) {
 		attrset(BAR_KEYBIND);
 		addstr(" K ");
 		attrset(TAG_NORMAL);
+		addch(' ');
 	}
 	if (key_index > 0) {
-		addch(' ');
 		for (unsigned int i = 0; i < key_index; i++) {
 			if (keys[i] < ' ')
 				printw("^%c", 'A' - 1 + keys[i]);
 			else
 				printw("%c", keys[i]);
 		}
+		addch(' ');
 	}
-
-	addch(' ');
 
 	getyx(stdscr, y, x);
 	(void)y;
