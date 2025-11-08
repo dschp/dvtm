@@ -250,6 +250,9 @@ static Register copyreg;
 static volatile sig_atomic_t running = true;
 static bool runinall = false;
 
+static unsigned int key_index = MAX_KEYS;
+static bool interpret_keybinding = true;
+
 static void
 eprint(const char *errstr, ...) {
 	va_list ap;
@@ -351,22 +354,30 @@ drawbar(void) {
 		printw(TAG_SYMBOL, tags[i]);
 	}
 
-	printw(" ");
+	addch(' ');
 
-	attrset(runinall ? TAG_SEL : TAG_NORMAL);
+	attrset(BAR_LAYOUT);
 	addstr(layout->symbol);
 	attrset(TAG_NORMAL);
 
-	printw(" ");
+	addch(' ');
 
-	for (unsigned int i = 0; i < MAX_KEYS && keys[i]; i++) {
-		if (keys[i] < ' ')
-			printw("^%c", 'A' - 1 + keys[i]);
-		else
-			printw("%c", keys[i]);
+	if (interpret_keybinding) {
+		attrset(BAR_KEY);
+		addstr(" key ");
+		attrset(TAG_NORMAL);
+	}
+	if (key_index > 0) {
+		addch(' ');
+		for (unsigned int i = 0; i < key_index; i++) {
+			if (keys[i] < ' ')
+				printw("^%c", 'A' - 1 + keys[i]);
+			else
+				printw("%c", keys[i]);
+		}
 	}
 
-	printw(" ");
+	addch(' ');
 
 	getyx(stdscr, y, x);
 	(void)y;
@@ -888,19 +899,6 @@ keypress(int code) {
 	int key = -1;
 	unsigned int len = 1;
 	char buf[8] = { '\e' };
-
-	if (code == '\e') {
-		/* pass characters following escape to the underlying app */
-		nodelay(stdscr, TRUE);
-		for (int t; len < sizeof(buf) && (t = getch()) != ERR; len++) {
-			if (t > 255) {
-				key = t;
-				break;
-			}
-			buf[len] = t;
-		}
-		nodelay(stdscr, FALSE);
-	}
 
 	for (Client *c = runinall ? nextvisible(clients) : sel; c; c = nextvisible(c->next)) {
 		if (is_content_visible(c)) {
@@ -1828,10 +1826,16 @@ parse_args(int argc, char *argv[]) {
 	return init;
 }
 
+void
+clear_keycombo() {
+	for (int i = 0; i < key_index; i++)
+		keys[i] = 0;
+	key_index = 0;
+}
+
 int
 main(int argc, char *argv[]) {
-	unsigned int key_index = 0;
-	memset(keys, 0, sizeof(keys));
+	clear_keycombo();
 	sigset_t emptyset, blockset;
 
 	setenv("DVTM", VERSION, 1);
@@ -1897,24 +1901,39 @@ main(int argc, char *argv[]) {
 			int code = getch();
 			if (code >= 0) {
 				keys[key_index++] = code;
+				if (code == '\e') {
+					code = getch();
+					if (code == '`') {
+						interpret_keybinding = !interpret_keybinding;
+						clear_keycombo();
+						goto key_consumed;
+					}
+					keys[key_index++] = code;
+				}
+
 				KeyBinding *binding = NULL;
 				if (code == KEY_MOUSE) {
 					key_index = 0;
 					handle_mouse();
-				} else if ((binding = keybinding(keys, key_index))) {
-					unsigned int key_length = MAX_KEYS;
-					while (key_length > 1 && !binding->keys[key_length-1])
-						key_length--;
-					if (key_index == key_length) {
-						binding->action.cmd(binding->action.args);
-						key_index = 0;
-						memset(keys, 0, sizeof(keys));
+					goto key_consumed;
+				} else if (interpret_keybinding) {
+					if ((binding = keybinding(keys, key_index))) {
+						unsigned int key_length = MAX_KEYS;
+						while (key_length > 1 && !binding->keys[key_length-1])
+							key_length--;
+						if (key_index == key_length) {
+							binding->action.cmd(binding->action.args);
+							clear_keycombo();
+						}
+						goto key_consumed;
 					}
-				} else {
-					key_index = 0;
-					memset(keys, 0, sizeof(keys));
-					keypress(code);
 				}
+
+				for (int i = 0; i < key_index; i++)
+					keypress(keys[i]);
+				clear_keycombo();
+
+				key_consumed:
 				drawbar();
 				if (is_content_visible(sel))
 					wnoutrefresh(sel->window);
