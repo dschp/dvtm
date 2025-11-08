@@ -351,9 +351,13 @@ drawbar(void) {
 		printw(TAG_SYMBOL, tags[i]);
 	}
 
+	printw(" ");
+
 	attrset(runinall ? TAG_SEL : TAG_NORMAL);
 	addstr(layout->symbol);
 	attrset(TAG_NORMAL);
+
+	printw(" ");
 
 	for (unsigned int i = 0; i < MAX_KEYS && keys[i]; i++) {
 		if (keys[i] < ' ')
@@ -361,6 +365,8 @@ drawbar(void) {
 		else
 			printw("%c", keys[i]);
 	}
+
+	printw(" ");
 
 	getyx(stdscr, y, x);
 	(void)y;
@@ -960,7 +966,8 @@ setup(void) {
 	mouse_setup();
 	raw();
 	vt_init();
-	vt_keytable_set(keytable, LENGTH(keytable));
+	if (LENGTH(keytable) > 0)
+		vt_keytable_set(keytable, LENGTH(keytable));
 	for (unsigned int i = 0; i < LENGTH(colors); i++) {
 		if (COLORS == 256) {
 			if (colors[i].fg256)
